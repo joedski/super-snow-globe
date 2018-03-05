@@ -1,4 +1,4 @@
 Super Snow Globe!
 =================
 
-A simple Teensy based project to make glowy lights that do things when shaken!
+A simple Adafruit Trinket based project to make glowy lights that do things when shaken!
