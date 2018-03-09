@@ -25,13 +25,13 @@ struct AnimationTimingModel {
   int16_t rate100;
 
   // Increments the timing model by some time delta, according to its rate.
-  increment(uint32_t timeDelta);
+  void increment(uint32_t timeDelta);
 
   // Same as increment, but rather than stopping at ANIMATION_PRORGESS_MAX or 0,
   // the animation will instead overflow to the other end.
   // i.e. if progress == ANIMATION_PRORGESS_MAX - 1,
   //   then progress += 2 will result in progress == 2.
-  incrementCyclic(uint32_t timeDelta);
+  void incrementCyclic(uint32_t timeDelta);
 };
 
 

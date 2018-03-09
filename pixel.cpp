@@ -1,8 +1,19 @@
+#include "utils.h"
+#include "pixel.h"
+
+
+void PixelState::init() {
+  timing.progress = 0;
+  timing.normalDuration = 500;
+  timing.rate100 = lerp_16(100, 50, globalTiming.progress);
+  // ...?  Pick color here?
+}
+
 
 // TODO: Should I make this a method?  "setFromHSV"?
 // Found here: https://learn.adafruit.com/sipping-power-with-neopixels/demo-code
 // HSV (hue-saturation-value) to RGB function with optional gamma correction.
-struct PixelColor hsv2rgb(int32_t h, uint8_t s, uint8_t v, boolean gc=false) {
+struct PixelColor hsv2rgb(int32_t h, uint8_t s, uint8_t v, boolean gc = false) {
   uint8_t n, r, g, b;
 
   // Hue circle = 0 to 1530 (NOT 1536!)

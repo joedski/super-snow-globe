@@ -34,6 +34,10 @@ void AnimationTimingModel::incrementCyclic(uint32_t timeDelta) {
 }
 
 
+/**
+ * Calculates the speculative next progress for a given time delta,
+ * upgrading progress to an int32_t (signed!) to account for over/underflows.
+ */
 int32_t speculativeProgressForTimeDelta(struct AnimationTimingModel * model, uint32_t timeDelta) {
   int16_t normalProgressIcrement = (int16_t)(ANIMATION_PRORGESS_MAX_UL * timeDelta / model->normalDuration);
   int32_t progressIncrement = (
