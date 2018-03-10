@@ -6,6 +6,9 @@ struct PixelColor {
   uint8_t: r;
   uint8_t: g;
   uint8_t: b;
+
+  static struct PixelColor random();
+  static struct PixelColor hsv(int32_t h, uint8_t s, uint8_t v, boolean gc = false);
 };
 
 struct PixelState {

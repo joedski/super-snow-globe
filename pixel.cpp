@@ -1,3 +1,5 @@
+#include <Arduino.h>
+#include "luts.h"
 #include "utils.h"
 #include "pixel.h"
 
@@ -10,10 +12,17 @@ void PixelState::init() {
 }
 
 
+// Pick a color randomly along the color wheel using the given value, saturation,
+// and gamma correction option.
+struct PixelColor PixelColor::random(s = 255, v = 255, gc = false) {
+  return PixelColor::hsv(random(1530), s, v, gc);
+}
+
+
 // TODO: Should I make this a method?  "setFromHSV"?
 // Found here: https://learn.adafruit.com/sipping-power-with-neopixels/demo-code
 // HSV (hue-saturation-value) to RGB function with optional gamma correction.
-struct PixelColor hsv2rgb(int32_t h, uint8_t s, uint8_t v, boolean gc = false) {
+struct PixelColor PixelColor::hsv(int32_t h, uint8_t s, uint8_t v, boolean gc = false) {
   uint8_t n, r, g, b;
 
   // Hue circle = 0 to 1530 (NOT 1536!)
