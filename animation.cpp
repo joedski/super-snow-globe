@@ -5,6 +5,13 @@ int32_t speculativeProgressForTimeDelta(struct AnimationTimingModel * model, uin
 
 
 void AnimationTimingModel::increment(uint32_t timeDelta) {
+  // Skip immediately on some cases.
+  // Assumes timeDelta is left unsigned and > 0.
+  if (
+    (rate100 > 0 && progress == ANIMATION_PRORGESS_MAX)
+    || (rate100 < 0 && progress == 0)
+  ) return;
+
   int32_t nextProgressSpeculative = speculativeProgressForTimeDelta(this, timeDelta);
 
   // This is the non-cyclic version, so we need to stop at either end.
