@@ -1,6 +1,8 @@
 #ifndef __LUTS_H__
 #define __LUTS_H__ yay
 
+#include <stdint.h>
+
 
 // I placed these here in this header because C++ is nice and lets you do that.
 // (without using extern, that is.)
@@ -10,7 +12,7 @@
 
 // 8-bit Sine table.
 const int _CSBASE_ = __COUNTER__ + 1; // Index of 1st __COUNTER__ ref below
-#define _S1_ (cosin((__COUNTER__ - _CSBASE_) / 128.0 * M_PI) + 1.0) * 127.5 + 0.5,
+#define _S1_ (cos((__COUNTER__ - _CSBASE_) / 128.0 * M_PI) + 1.0) * 127.5 + 0.5,
 #define _S2_ _S1_ _S1_ _S1_ _S1_ _S1_ _S1_ _S1_ _S1_ // Expands to 8 items
 #define _S3_ _S2_ _S2_ _S2_ _S2_ _S2_ _S2_ _S2_ _S2_ // Expands to 64 items
 const uint8_t PROGMEM cosineTable[] = { _S3_ _S3_ _S3_ _S3_ }; // 256 items

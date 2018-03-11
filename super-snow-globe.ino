@@ -6,10 +6,10 @@
 
 
 // 60fps = ~17ms (16.67ms), 30fps = ~33ms (33.33ms)
-#define RUNLOOP_DELAY_MS 17
+#define RUNLOOP_DELAY_MS 10
 #define PIXEL_COUNT 6
-// #define DEBUG_LED_PIN 13
-// #define NEOPIXEL_PIN ???
+#define DEBUG_PIN LED_BUILTIN
+#define NEOPIXEL_PIN 6
 
 
 Adafruit_NeoPixel neoPixelStrip = Adafruit_NeoPixel(PIXEL_COUNT, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
@@ -17,6 +17,7 @@ Adafruit_NeoPixel neoPixelStrip = Adafruit_NeoPixel(PIXEL_COUNT, NEOPIXEL_PIN, N
 
 struct GlobalAnimationState {
   struct AnimationTimingModel timing;
+  unsigned long millis;
 } globalState = {
   .timing = {0, 10000, 100}
 };
@@ -24,12 +25,15 @@ struct GlobalAnimationState {
 struct PixelState pixels[PIXEL_COUNT] = {};
 // Give them a nice sequence that's not just in a circle.
 uint8_t pixelOrder[PIXEL_COUNT] = {0, 2, 4, 1, 5, 3};
-unsigned long lastMillis;
 
 
 void setup() {
-  // Initialize our pixels for the first time.
+  pinMode(LED_BUILTIN, OUTPUT);
 
+  // Initialize anything timing-sensitive in the global state.
+  globalState.millis = millis();
+
+  // Initialize our pixels for the first time.
   char i;
 
   for (i = 0; i < PIXEL_COUNT; ++i) {
@@ -44,13 +48,14 @@ void setup() {
 
     pixels[i].timing = {
       (uint16_t)((uint32_t)ANIMATION_PRORGESS_MAX * (uint32_t)pixelOrder[i] / PIXEL_COUNT),
-      // 500,
-      1000,
+      500,
+      // 1000,
       100
     };
   }
 
-  lastMillis = millis();
+  // Initialize the NeoPixel library.
+  neoPixelStrip.begin();
 }
 
 void loop_read();
@@ -70,7 +75,8 @@ void loop() {
 
   // ======== Wait
   // I do this to keep a steady ~60fps.
-  long runloopDuration = millis() - lastMillis;
+  long nextMillis = millis();
+  long runloopDuration = nextMillis - globalState.millis;
   long remainingDelay = RUNLOOP_DELAY_MS - runloopDuration;
   int animationTimeOverran = remainingDelay < 0;
 
@@ -84,6 +90,7 @@ void loop() {
 #endif
 
   delay(animationTimeOverran ? 0 : remainingDelay);
+  globalState.millis = nextMillis;
 }
 
 

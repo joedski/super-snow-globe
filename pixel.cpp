@@ -6,8 +6,8 @@
 
 // Pick a color randomly along the color wheel using the given value, saturation,
 // and gamma correction option.
-struct PixelColor PixelColor::random(s = 255, v = 255, gc = false) {
-  return PixelColor::hsv(random(1530), s, v, gc);
+struct PixelColor PixelColor::random(uint8_t s = 255, uint8_t v = 255, boolean gc = false) {
+  return PixelColor::hsv(::random(1530), s, v, gc);
 }
 
 

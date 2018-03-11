@@ -16,7 +16,7 @@ void AnimationTimingModel::increment(uint32_t timeDelta) {
     progress = 0;
   }
   else {
-    progres = nextProgressSpeculative;
+    progress = nextProgressSpeculative;
   }
 }
 

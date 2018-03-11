@@ -1,6 +1,8 @@
 #ifndef __ANIMATION_H__
 #define __ANIMATION_H__ yay
 
+#include <stdint.h>
+
 
 // Progress max value.
 #define ANIMATION_PRORGESS_MAX 65535
