@@ -33,9 +33,10 @@ struct AnimationTimingModel {
   void increment(uint32_t timeDelta);
 
   // Same as increment, but rather than stopping at ANIMATION_PRORGESS_MAX or 0,
-  // the animation will instead overflow to the other end.
+  // the animation will instead under/overflow to the other end.
   // i.e. if progress == ANIMATION_PRORGESS_MAX - 1,
   //   then progress += 2 will result in progress == 2.
+  // The same if progress ends up below 0.
   void incrementCyclic(uint32_t timeDelta);
 
 
