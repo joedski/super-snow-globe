@@ -4,14 +4,6 @@
 #include "pixel.h"
 
 
-void PixelState::init() {
-  timing.progress = 0;
-  timing.normalDuration = 500;
-  timing.rate100 = lerp_16(100, 50, globalTiming.progress);
-  // ...?  Pick color here?
-}
-
-
 // Pick a color randomly along the color wheel using the given value, saturation,
 // and gamma correction option.
 struct PixelColor PixelColor::random(s = 255, v = 255, gc = false) {
@@ -54,4 +46,21 @@ struct PixelColor PixelColor::hsv(int32_t h, uint8_t s, uint8_t v, boolean gc = 
 
   // return ((uint32_t)r << 16) | ((uint16_t)g << 8) | b;
   return {r, g, b};
+}
+
+
+struct PixelColor PixelColor::gammaCorrected() {
+  return {
+    pgm_read_byte(&gammaTable[r]),
+    pgm_read_byte(&gammaTable[g]),
+    pgm_read_byte(&gammaTable[b])
+  };
+}
+
+struct PixelColor PixelColor::valueScaled(uint8_t v) {
+  return {
+    (uint8_t)((uint16_t)r * (uint16_t)v / 255),
+    (uint8_t)((uint16_t)g * (uint16_t)v / 255),
+    (uint8_t)((uint16_t)b * (uint16_t)v / 255),
+  };
 }

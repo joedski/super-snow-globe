@@ -24,6 +24,9 @@ struct AnimationTimingModel {
   // etc.
   int16_t rate100;
 
+
+  // ======== Mutations
+
   // Increments the timing model by some time delta, according to its rate.
   void increment(uint32_t timeDelta);
 
@@ -32,6 +35,15 @@ struct AnimationTimingModel {
   // i.e. if progress == ANIMATION_PRORGESS_MAX - 1,
   //   then progress += 2 will result in progress == 2.
   void incrementCyclic(uint32_t timeDelta);
+
+
+  // ======== Derivers
+
+  // Convenience method returning the progress as an unsigned 8-bit,
+  // usually for LUTs and such.
+  uint8_t progress8() {
+    return progress / 256;
+  }
 };
 
 
