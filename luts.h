@@ -8,16 +8,17 @@
 // (without using extern, that is.)
 
 // See here for an explanation: https://learn.adafruit.com/sipping-power-with-neopixels/demo-code
+// See here for a description of the counter macro: https://gcc.gnu.org/onlinedocs/cpp/Common-Predefined-Macros.html
 // Because these are PROGRMEM, you have to read them with `pgm_read_byte(&sineTable[i])`.
 
-// 8-bit Sine table.
+// 8-bit Cosine table.
 const int _CSBASE_ = __COUNTER__ + 1; // Index of 1st __COUNTER__ ref below
 #define _S1_ (cos((__COUNTER__ - _CSBASE_) / 128.0 * M_PI) + 1.0) * 127.5 + 0.5,
 #define _S2_ _S1_ _S1_ _S1_ _S1_ _S1_ _S1_ _S1_ _S1_ // Expands to 8 items
 #define _S3_ _S2_ _S2_ _S2_ _S2_ _S2_ _S2_ _S2_ _S2_ // Expands to 64 items
 const uint8_t PROGMEM cosineTable[] = { _S3_ _S3_ _S3_ _S3_ }; // 256 items
 
-// NOTE: I don't need a size table.  Or, rather, the cosine table is more convenient for my needs.
+// NOTE: I don't need a sine table.  Or, rather, the cosine table is more convenient for my needs.
 // // 8-bit Sine table.
 // const int _SBASE_ = __COUNTER__ + 1; // Index of 1st __COUNTER__ ref below
 // #define _S1_ (sin((__COUNTER__ - _SBASE_) / 128.0 * M_PI) + 1.0) * 127.5 + 0.5,
