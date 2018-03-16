@@ -4,6 +4,19 @@
 #include "pixel.h"
 
 
+uint8_t clampColorValueUint16(uint16_t v) {
+  if (v > UINT8_MAX) return UINT8_MAX;
+  if (v < 0) return 0;
+  return v;
+}
+
+uint8_t clampColorValueInt32(int32_t v) {
+  if (v > UINT8_MAX) return UINT8_MAX;
+  if (v < 0) return 0;
+  return v;
+}
+
+
 // Pick a color randomly along the color wheel using the given value, saturation,
 // and gamma correction option.
 struct PixelColor PixelColor::random(uint8_t s = 255, uint8_t v = 255, boolean gc = false) {
@@ -48,7 +61,6 @@ struct PixelColor PixelColor::hsv(int32_t h, uint8_t s, uint8_t v, boolean gc = 
   return {r, g, b};
 }
 
-
 struct PixelColor PixelColor::gammaCorrected() {
   return {
     pgm_read_byte(&gammaTable[r]),
@@ -59,8 +71,28 @@ struct PixelColor PixelColor::gammaCorrected() {
 
 struct PixelColor PixelColor::valueScaled(uint8_t v) {
   return {
-    (uint8_t)((uint16_t)r * (uint16_t)v / 255),
-    (uint8_t)((uint16_t)g * (uint16_t)v / 255),
-    (uint8_t)((uint16_t)b * (uint16_t)v / 255),
+    clampColorValueUint16((uint16_t)r * (uint16_t)v / 255),
+    clampColorValueUint16((uint16_t)g * (uint16_t)v / 255),
+    clampColorValueUint16((uint16_t)b * (uint16_t)v / 255),
+  };
+}
+
+struct PixelColor PixelColor::convolveColor3(ColorTransferMatrix3x3 &transfer) {
+  return {
+    .r = clampColorValueInt32((
+      (int32_t)r * transfer.r.r
+      + (int32_t)g * transfer.r.g
+      + (int32_t)b * transfer.r.b
+    ) / 255),
+    .g = clampColorValueInt32((
+      (int32_t)r * transfer.g.r
+      + (int32_t)g * transfer.g.g
+      + (int32_t)b * transfer.g.b
+    ) / 255),
+    .b = clampColorValueInt32((
+      (int32_t)r * transfer.b.r
+      + (int32_t)g * transfer.b.g
+      + (int32_t)b * transfer.b.b
+    ) / 255),
   };
 }

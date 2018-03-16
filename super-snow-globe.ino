@@ -15,6 +15,15 @@
 Adafruit_NeoPixel neoPixelStrip = Adafruit_NeoPixel(PIXEL_COUNT, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
 
 
+// This works pretty well to take a fully saturated random hue and making it nice and warm
+// almost like the incandescent lights of yore.
+// Red and Gold are the richest, while blues are very muted.
+struct ColorTransferMatrix3x3 warmingTransfer = {
+  {255*0.75, 255*0.25, 255*0.375},
+  {255*0.0, 255*0.675, 255*0.125},
+  {255*0.0, 255*0.0, 255*0.55}
+};
+
 struct GlobalAnimationState {
   struct AnimationTimingModel timing;
   unsigned long millis;
@@ -48,8 +57,7 @@ void setup() {
 
     pixels[i].timing = {
       (uint16_t)((uint32_t)ANIMATION_PRORGESS_MAX * (uint32_t)pixelOrder[i] / PIXEL_COUNT),
-      500,
-      // 1000,
+      2000, // 500,
       100
     };
   }
@@ -125,7 +133,7 @@ void loop_update() {
   for (i = 0; i < PIXEL_COUNT; ++i) {
     if (pixels[i].timing.progress == ANIMATION_PRORGESS_MAX) {
       pixels[i].timing.progress = 0;
-      pixels[i].color = PixelColor::random();
+      pixels[i].color = PixelColor::random().convolveColor3(warmingTransfer);
     }
     else {
       pixels[i].timing.increment(RUNLOOP_DELAY_MS);
