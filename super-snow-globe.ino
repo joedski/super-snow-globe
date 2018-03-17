@@ -146,15 +146,7 @@ void loop_write() {
   struct PixelColor renderedColor;
 
   for (i = 0; i < PIXEL_COUNT; ++i) {
-    // Our actual pixel animation:
-    // going from t=0.0 to t=1.0, we first ramp up the sine curve then back down.
-    // If we were calculating sines directly, we cauld just scale by 2pi, but eh.
-    // NOTE: I originally thought the sine table was a half cosine for some reason. Herp.
-    // uint8_t valueScaleLookup = pixels[i].timing.progress > 32767
-    //   ? 256 - pixels[i].timing.progress8() * 2
-    //   : pixels[i].timing.progress8() * 2
-    //   ;
-    // uint8_t valueScale =  pgm_read_byte(&sineTable[valueScaleLookup]);
+    // Our actual pixel animation.
     uint8_t valueScale = 255 - pgm_read_byte(&cosineTable[pixels[i].timing.progress8()]);
     // A bit inefficient since we're creating a couple new pixels in memory each time,
     // but we're not the most timing critical here.
