@@ -13,10 +13,17 @@
 
 // 8-bit Cosine table.
 const int _CSBASE_ = __COUNTER__ + 1; // Index of 1st __COUNTER__ ref below
-#define _S1_ (cos((__COUNTER__ - _CSBASE_) / 128.0 * M_PI) + 1.0) * 127.5 + 0.5,
-#define _S2_ _S1_ _S1_ _S1_ _S1_ _S1_ _S1_ _S1_ _S1_ // Expands to 8 items
-#define _S3_ _S2_ _S2_ _S2_ _S2_ _S2_ _S2_ _S2_ _S2_ // Expands to 64 items
-const uint8_t PROGMEM cosineTable[] = { _S3_ _S3_ _S3_ _S3_ }; // 256 items
+#define _CS1_ (cos((__COUNTER__ - _CSBASE_) / 128.0 * M_PI) + 1.0) * 127.5 + 0.5,
+#define _CS2_ _CS1_ _CS1_ _CS1_ _CS1_ _CS1_ _CS1_ _CS1_ _CS1_ // Expands to 8 items
+#define _CS3_ _CS2_ _CS2_ _CS2_ _CS2_ _CS2_ _CS2_ _CS2_ _CS2_ // Expands to 64 items
+const uint8_t PROGMEM cosineTable[] = { _CS3_ _CS3_ _CS3_ _CS3_ }; // 256 items
+
+// 8-bit Half Inverted Cosine table.
+const int _IHCSBASE_ = __COUNTER__ + 1; // Index of 1st __COUNTER__ ref below
+#define _IHCS1_ (-cos((__COUNTER__ - _IHCSBASE_) / 256.0 * M_PI) + 1.0) * 127.5 + 0.5,
+#define _IHCS2_ _IHCS1_ _IHCS1_ _IHCS1_ _IHCS1_ _IHCS1_ _IHCS1_ _IHCS1_ _IHCS1_ // Expands to 8 items
+#define _IHCS3_ _IHCS2_ _IHCS2_ _IHCS2_ _IHCS2_ _IHCS2_ _IHCS2_ _IHCS2_ _IHCS2_ // Expands to 64 items
+const uint8_t PROGMEM invHalfCosineTable[] = { _IHCS3_ _IHCS3_ _IHCS3_ _IHCS3_ }; // 256 items
 
 // NOTE: I don't need a sine table.  Or, rather, the cosine table is more convenient for my needs.
 // // 8-bit Sine table.

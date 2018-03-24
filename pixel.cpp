@@ -16,6 +16,16 @@ uint8_t clampColorValueInt32(int32_t v) {
   return v;
 }
 
+/**
+ * multiply two bytes as though they were floats from 0 to 1.
+ * @param  a operand
+ * @param  b operand
+ * @return   a * b
+ */
+uint8_t multiply(uint8_t a, uint8_t b) {
+  return (uint8_t)((uint16_t)a * (uint16_t)b >> 8);
+}
+
 
 // Pick a color randomly along the color wheel using the given value, saturation,
 // and gamma correction option.
@@ -94,5 +104,13 @@ struct PixelColor PixelColor::convolveColor3(ColorTransferMatrix3x3 &transfer) {
       + (int32_t)g * transfer.b.g
       + (int32_t)b * transfer.b.b
     ) / 255),
+  };
+}
+
+struct PixelColor PixelColor::multiply(struct PixelColor &other) {
+  return {
+    .r = ::multiply(r, other.r),
+    .g = ::multiply(g, other.g),
+    .b = ::multiply(b, other.b),
   };
 }

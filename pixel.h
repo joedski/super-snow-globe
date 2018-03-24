@@ -46,6 +46,8 @@ struct PixelColor {
    * @param  transfer A ColorTransferMatrix3x3.
    */
   struct PixelColor convolveColor3(ColorTransferMatrix3x3 &transfer);
+
+  struct PixelColor multiply(struct PixelColor &other);
 };
 
 struct PixelState {

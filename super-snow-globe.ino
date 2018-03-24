@@ -1,4 +1,5 @@
 #include <Adafruit_NeoPixel.h>
+#include <stdint.h>
 
 #include "animation.h"
 #include "luts.h"
@@ -141,16 +142,54 @@ void loop_update() {
   }
 }
 
+uint8_t ihcs(uint8_t t) {
+  // return 255 - pgm_read_byte(&cosineTable[t >> 1]);
+  return pgm_read_byte(&invHalfCosineTable[t]);
+}
+
+PixelColor ihcs(PixelColor &c) {
+  return {
+    .r = ihcs(c.r),
+    .g = ihcs(c.g),
+    .b = ihcs(c.b),
+  };
+}
+
+uint8_t lerp_u8(uint8_t a, uint8_t b, uint8_t t) {
+  uint16_t aa = a, bb = b, tt = t, itt = UINT8_MAX - t;
+  uint16_t r = ((itt * aa >> 8) + (tt * bb >> 8));
+  r = r > UINT8_MAX ? UINT8_MAX : r;
+  return r;
+}
+
+uint8_t cramp_u8(uint8_t a, uint8_t b, uint8_t t) {
+  if (t < a) return 0;
+  if (t >= b) return UINT8_MAX;
+  uint16_t aa = a, bb = b, tt = t;
+  return (uint8_t)((tt - aa) * UINT8_MAX / (bb - aa));
+}
+
+PixelColor renderScaledIHCS(PixelState &pixel) {
+  uint8_t pixelProgress = pixel.timing.progress8();
+  uint8_t heatT = pixelProgress < 128 ? pixelProgress << 1 : (UINT8_MAX - pixelProgress) << 1;
+
+  PixelColor renderedColor = {
+    .r = ihcs(cramp_u8(0, 255, heatT)),
+    .g = ihcs(cramp_u8(32, 255, heatT)),
+    .b = ihcs(cramp_u8(64, 255, heatT)),
+  };
+
+  return renderedColor;
+}
+
 void loop_write() {
   char i;
   struct PixelColor renderedColor;
+  uint8_t pixelProgress;
 
   for (i = 0; i < PIXEL_COUNT; ++i) {
     // Our actual pixel animation.
-    uint8_t valueScale = 255 - pgm_read_byte(&cosineTable[pixels[i].timing.progress8()]);
-    // A bit inefficient since we're creating a couple new pixels in memory each time,
-    // but we're not the most timing critical here.
-    renderedColor = pixels[i].color.valueScaled(valueScale).gammaCorrected();
+    renderedColor = renderScaledIHCS(pixels[i]).multiply(pixels[i].color).gammaCorrected();
     neoPixelStrip.setPixelColor(i, neoPixelStrip.Color(renderedColor.r, renderedColor.g, renderedColor.b));
   }
 
