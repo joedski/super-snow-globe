@@ -23,31 +23,6 @@ struct PixelColor {
   uint8_t r;
   uint8_t g;
   uint8_t b;
-
-  // Factories
-  static struct PixelColor random(uint8_t s = 255, uint8_t v = 255, boolean gc = false);
-  static struct PixelColor hsv(int32_t h, uint8_t s, uint8_t v, boolean gc = false);
-
-  // Derivers
-
-  /**
-   * Get a gamma corrected version of a color.
-   */
-  struct PixelColor gammaCorrected();
-
-  /**
-   * Scale a value from 0% to 100%. (0 to 255)
-   * @param  v Value to scale by.
-   */
-  struct PixelColor valueScaled(uint8_t v);
-
-  /**
-   * Convolve a color by a transfer matrix.
-   * @param  transfer A ColorTransferMatrix3x3.
-   */
-  struct PixelColor convolveColor3(ColorTransferMatrix3x3 &transfer);
-
-  struct PixelColor multiply(struct PixelColor &other);
 };
 
 struct PixelState {
