@@ -368,7 +368,6 @@ void loop_update() {
   for (char i = 0; i < PIXEL_COUNT; ++i) {
     if (pixels[i].timing.progress == ANIMATION_PRORGESS_MAX) {
       pixels[i].timing.progress = 0;
-      // pixels[i].color = PixelColor::random().convolveColor3(warmingTransfer);
       pixels[i].color = randomHue();
       pixels[i].color = der_convolve(pixels[i].color, warmingTransfer);
     }
@@ -390,7 +389,6 @@ void loop_write() {
     mut_pseudoIncandescentRamp(renderedColor, pixelValueLinear);
     mut_gammaCorrect(renderedColor);
 
-    // renderedColor = renderScaledIHCS(pixels[i]).multiply(pixels[i].color).gammaCorrected();
     neoPixelStrip.setPixelColor(i, neoPixelStrip.Color(renderedColor.r, renderedColor.g, renderedColor.b));
   }
 
