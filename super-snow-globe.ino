@@ -12,6 +12,24 @@
 #define DEBUG_PIN LED_BUILTIN
 #define NEOPIXEL_PIN 6
 
+// #define COLOR_WHITE  {0xFE, 0xE6, 0x8D} // A little too neutral...
+// #define COLOR_WHITE  {0xFA, 0xDC, 0x6C} // A little too yellow???
+#define COLOR_WHITE  {0xFF, 0xE4, 0x7E}
+// #define COLOR_BLUE   {0x2D, 0x3E, 0x88} // Too dark and saturated?
+// #define COLOR_BLUE   {0x1E, 0xC0, 0xE8} // Too bright.
+// #define COLOR_BLUE   {0x00, 0x6F, 0xA6} // A little too bright, still.
+// #define COLOR_BLUE   {0x3E, 0x4E, 0x95} // Still too blue.
+// #define COLOR_BLUE   {0x2D, 0x4E, 0x88} // still to saturated?
+// #define COLOR_BLUE   {0x35, 0x4A, 0x6E} // A little dark.
+#define COLOR_BLUE   {0x39, 0x53, 0x7F}
+// #define COLOR_GREEN  {0x0D, 0x93, 0x42} // Too blue?
+// #define COLOR_GREEN  {0x0D, 0x93, 0x14} // Too saturated?
+#define COLOR_GREEN  {0x4F, 0x9E, 0x60}
+#define COLOR_YELLOW {0xFE, 0xB4, 0x00}
+#define COLOR_ORANGE {0xF1, 0x5D, 0x00}
+#define COLOR_RED    {0xEF, 0x2B, 0x00}
+#define COLOR_PINK   {0xF6, 0x35, 0x84}
+
 
 // Globals
 // ================================
@@ -19,6 +37,21 @@
 // all of our state and such.
 
 Adafruit_NeoPixel neoPixelStrip = Adafruit_NeoPixel(PIXEL_COUNT, NEOPIXEL_PIN, NEO_GRB + NEO_KHZ800);
+
+// I opted to cycle through colors deterministically to prevent over-prevalence
+// of any one side of the color wheel, as well as to control the proportions of each side.
+// Notice that the cool colors only show up 2/7, while the warm colors show up 3/7.
+// The remaining 2/7 are of course white.
+#define COLOR_CYCLE_LENGTH 7
+struct PixelColor colorCycle[] = {
+  COLOR_WHITE,
+  COLOR_RED,
+  COLOR_YELLOW,
+  COLOR_WHITE,
+  COLOR_BLUE,
+  COLOR_PINK,
+  COLOR_GREEN,
+};
 
 // This works pretty well to take a fully saturated random hue and making it nice and warm
 // almost like the incandescent lights of yore.
@@ -32,8 +65,15 @@ struct ColorTransferMatrix3x3 warmingTransfer = {
 struct GlobalAnimationState {
   struct AnimationTimingModel timing;
   unsigned long millis;
+  char nextColor;
+
+  void incrNextColor() {
+    nextColor = (nextColor + 1) % COLOR_CYCLE_LENGTH;
+  }
 } globalState = {
-  .timing = {0, 10000, 100}
+  .timing = {0, 10000, 100},
+  .millis = 0,
+  .nextColor = 0,
 };
 // struct AnimationTimingModel globalTiming = {0, 10000, 100};
 struct PixelState pixels[PIXEL_COUNT] = {};
@@ -286,7 +326,8 @@ void setup() {
     // Just to make things start out nicely, we initialize all but the first one
     // to black.
     if (pixelOrder[i] == 0) {
-      pixels[i].color = randomHue();
+      pixels[i].color = colorCycle[globalState.nextColor];
+      globalState.incrNextColor();
     }
     else {
       pixels[i].color = {0, 0, 0};
@@ -368,8 +409,10 @@ void loop_update() {
   for (char i = 0; i < PIXEL_COUNT; ++i) {
     if (pixels[i].timing.progress == ANIMATION_PRORGESS_MAX) {
       pixels[i].timing.progress = 0;
-      pixels[i].color = randomHue();
-      pixels[i].color = der_convolve(pixels[i].color, warmingTransfer);
+      pixels[i].color = colorCycle[globalState.nextColor];
+      globalState.incrNextColor();
+      // pixels[i].color = randomHue();
+      // pixels[i].color = der_convolve(pixels[i].color, warmingTransfer);
     }
     else {
       pixels[i].timing.increment(RUNLOOP_DELAY_MS);
