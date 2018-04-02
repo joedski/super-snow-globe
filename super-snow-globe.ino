@@ -12,18 +12,10 @@
 #define DEBUG_PIN LED_BUILTIN
 #define NEOPIXEL_PIN 6
 
-// #define COLOR_WHITE  {0xFE, 0xE6, 0x8D} // A little too neutral...
-// #define COLOR_WHITE  {0xFA, 0xDC, 0x6C} // A little too yellow???
+// These colors were chosen from photos of old incadescent christmas lights, tweaked to
+// counter act the relative blueness of the LEDs I was using.
 #define COLOR_WHITE  {0xFF, 0xE4, 0x7E}
-// #define COLOR_BLUE   {0x2D, 0x3E, 0x88} // Too dark and saturated?
-// #define COLOR_BLUE   {0x1E, 0xC0, 0xE8} // Too bright.
-// #define COLOR_BLUE   {0x00, 0x6F, 0xA6} // A little too bright, still.
-// #define COLOR_BLUE   {0x3E, 0x4E, 0x95} // Still too blue.
-// #define COLOR_BLUE   {0x2D, 0x4E, 0x88} // still to saturated?
-// #define COLOR_BLUE   {0x35, 0x4A, 0x6E} // A little dark.
 #define COLOR_BLUE   {0x39, 0x53, 0x7F}
-// #define COLOR_GREEN  {0x0D, 0x93, 0x42} // Too blue?
-// #define COLOR_GREEN  {0x0D, 0x93, 0x14} // Too saturated?
 #define COLOR_GREEN  {0x4F, 0x9E, 0x60}
 #define COLOR_YELLOW {0xFE, 0xB4, 0x00}
 #define COLOR_ORANGE {0xF1, 0x5D, 0x00}
@@ -42,6 +34,12 @@ Adafruit_NeoPixel neoPixelStrip = Adafruit_NeoPixel(PIXEL_COUNT, NEOPIXEL_PIN, N
 // of any one side of the color wheel, as well as to control the proportions of each side.
 // Notice that the cool colors only show up 2/7, while the warm colors show up 3/7.
 // The remaining 2/7 are of course white.
+// By using a number near but not equal to the number of lights, I'm able to have a nice
+// not-quite-obvious cyclic pattern.  The pixelOrder array also helps in this regard.
+// I could still use a randomHue + warmingTransfer strategy if I wanted to, but to prevent sticking
+// to any one side of the color wheel I'd track the last hue and add a random increment rather than
+// just picking a random hue.  If I wanted to bias the wheel in favor of warm colors, I could
+// make the base increment larger when on the cool side and smaller on the warm side.
 #define COLOR_CYCLE_LENGTH 7
 struct PixelColor colorCycle[] = {
   COLOR_WHITE,
@@ -51,15 +49,6 @@ struct PixelColor colorCycle[] = {
   COLOR_BLUE,
   COLOR_PINK,
   COLOR_GREEN,
-};
-
-// This works pretty well to take a fully saturated random hue and making it nice and warm
-// almost like the incandescent lights of yore.
-// Red and Gold are the richest, while blues are very muted.
-struct ColorTransferMatrix3x3 warmingTransfer = {
-  {255*0.75, 255*0.25, 255*0.375},
-  {255*0.0, 255*0.675, 255*0.125},
-  {255*0.0, 255*0.0, 255*0.55}
 };
 
 struct GlobalAnimationState {
@@ -75,9 +64,10 @@ struct GlobalAnimationState {
   .millis = 0,
   .nextColor = 0,
 };
-// struct AnimationTimingModel globalTiming = {0, 10000, 100};
+
 struct PixelState pixels[PIXEL_COUNT] = {};
 // Give them a nice sequence that's not just in a circle.
+// This order was chosen was to prevent the next color from being adjacent to the last.
 uint8_t pixelOrder[PIXEL_COUNT] = {0, 2, 4, 1, 5, 3};
 
 
@@ -227,26 +217,6 @@ void mut_gammaCorrect(PixelColor &color) {
 
 PixelColor clone(PixelColor &color) {
   return { .r = color.r, .g = color.g, .b = color.b };
-}
-
-PixelColor der_convolve(PixelColor &color, ColorTransferMatrix3x3 &transfer) {
-  return {
-    .r = clamp((
-      (int32_t)color.r * transfer.r.r
-      + (int32_t)color.g * transfer.r.g
-      + (int32_t)color.b * transfer.r.b
-    ) / 255),
-    .g = clamp((
-      (int32_t)color.r * transfer.g.r
-      + (int32_t)color.g * transfer.g.g
-      + (int32_t)color.b * transfer.g.b
-    ) / 255),
-    .b = clamp((
-      (int32_t)color.r * transfer.b.r
-      + (int32_t)color.g * transfer.b.g
-      + (int32_t)color.b * transfer.b.b
-    ) / 255),
-  };
 }
 
 
@@ -411,8 +381,6 @@ void loop_update() {
       pixels[i].timing.progress = 0;
       pixels[i].color = colorCycle[globalState.nextColor];
       globalState.incrNextColor();
-      // pixels[i].color = randomHue();
-      // pixels[i].color = der_convolve(pixels[i].color, warmingTransfer);
     }
     else {
       pixels[i].timing.increment(RUNLOOP_DELAY_MS);
