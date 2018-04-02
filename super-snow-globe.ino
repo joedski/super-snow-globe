@@ -67,7 +67,7 @@ uint8_t lerp(uint8_t a, uint8_t b, uint8_t t) {
 }
 
 /**
- * 8-bit Clamped-Ramp, or Cramp.  Sort of related to a Lerp, but rather than specifying two values
+ * 8-bit Clamped-Ramp, or Cramp.  The (almost) inverse of a Lerp: rather than specifying two values
  * to interpolate between, you specify the two ends of the ramp between 0% (=0) and 100% (=255).
  * That is, if you pass a=64 and b=191 then t-values between 64 and 191 get mapped to an output
  * of 0 to 255, while t-values below 64 are mapped to 0 and t-values above or at 191
@@ -134,6 +134,24 @@ uint8_t clamp(int32_t v) {
   return v;
 }
 
+// A common operation is to take a signed 32-bit integer or
+// an unsigned 16-bit integer and shift it down 8 bits
+// before casting it to an unsigned 8-bit integer.
+// This is a quick and efficient way to normalize numbers after multiplication,
+// which is common when treating bytes as progress values.
+
+/**
+ * Convert a signed-32-int to an unsigned-8-int, clamping negative values to 0
+ * and values above the max unsigned-16-int to the max unsigned-8-int.
+ * @param  v [description]
+ * @return   [description]
+ */
+uint8_t clampShiftU8(int32_t v) {
+  if (v < 0) return 0;
+  if (v >= UINT16_MAX) return UINT8_MAX;
+  return v >> 8;
+}
+
 
 
 // Mutators
@@ -191,21 +209,21 @@ PixelColor clone(PixelColor &color) {
 
 PixelColor der_convolve(PixelColor &color, ColorTransferMatrix3x3 &transfer) {
   return {
-    .r = clamp((
+    .r = clampShiftU8(
       (int32_t)color.r * transfer.r.r
       + (int32_t)color.g * transfer.r.g
       + (int32_t)color.b * transfer.r.b
-    ) / 255),
-    .g = clamp((
+    ),
+    .g = clampShiftU8(
       (int32_t)color.r * transfer.g.r
       + (int32_t)color.g * transfer.g.g
       + (int32_t)color.b * transfer.g.b
-    ) / 255),
-    .b = clamp((
+    ),
+    .b = clampShiftU8(
       (int32_t)color.r * transfer.b.r
       + (int32_t)color.g * transfer.b.g
       + (int32_t)color.b * transfer.b.b
-    ) / 255),
+    ),
   };
 }
 
